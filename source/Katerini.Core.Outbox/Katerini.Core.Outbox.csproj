@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Dapper" Version="2.1.15" />
+        <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Katerini.Core.Messaging\Katerini.Core.Messaging.csproj" />
+    </ItemGroup>
+
+</Project>

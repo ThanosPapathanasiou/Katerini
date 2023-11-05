@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="Pages\Htmx.fs" />
+        <Compile Include="Pages\BaseView.fs" />
+        <Compile Include="Pages\Components\TextField.fs" />
+        <Compile Include="Pages\ContactForm.fs" />
+        <Compile Include="Pages\Index.fs" />
+        <Compile Include="Program.fs"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.1" />
+        <PackageReference Include="Serilog" Version="2.12.0" />
+        <PackageReference Include="Zanaptak.TypedCssClasses" Version="1.0.0" />
+        <PackageReference Include="Giraffe" Version="6.2.0" />
+
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1"/>
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
+        <PackageReference Include="Serilog.Extensions.Logging" Version="7.0.0" />
+        <PackageReference Include="Serilog.Settings.Configuration" Version="7.0.1" />
+        <PackageReference Include="Serilog.Sinks.Console" Version="4.1.0" />
+        <PackageReference Include="Serilog.Sinks.Seq" Version="5.2.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Katerini.Core.Messaging\Katerini.Core.Messaging.csproj" />
+        <ProjectReference Include="..\Katerini.Core.Outbox\Katerini.Core.Outbox.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="..\..\.dockerignore">
+            <Link>.dockerignore</Link>
+        </Content>
+        <Content Include="Dockerfile" />
+    </ItemGroup>
+    
+</Project>

@@ -1,0 +1,11 @@
+﻿{
+  "profiles": {
+    "Katerini.Service": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

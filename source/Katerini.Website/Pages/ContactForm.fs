@@ -124,7 +124,7 @@ let ``POST /contact-form`` : HttpHandler =
             | Valid validEmail, Valid validFirstName, Valid validLastName ->
                 let message = ContactUsMessage(validFirstName, validLastName, validEmail)
 
-                use scope = new TransactionScope()
+                use scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled)
                 do! outbox.AddToOutboxAsync(message)
                 scope.Complete()
 

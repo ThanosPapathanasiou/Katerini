@@ -1,4 +1,6 @@
-﻿namespace Katerini.Database;
+﻿using System;
+
+namespace Katerini.Database;
 
 public static class Program
 {

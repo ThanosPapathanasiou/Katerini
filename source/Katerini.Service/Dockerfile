@@ -3,6 +3,8 @@ WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
+COPY ["Directory.Build.props", "Directory.Build.props"]
+COPY ["Directory.Packages.props", "Directory.Packages.props"]
 COPY ["source/", "source/"]
 RUN dotnet restore "source/Katerini.Service/Katerini.Service.csproj"
 COPY . .

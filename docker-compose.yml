@@ -9,7 +9,7 @@ services:
     environment:
       - DOTNET_ENVIRONMENT=Docker # just to make it easy to differentiate in the logs when running locally vs in docker
       - ConnectionStrings__RabbitMq=amqp://rabbitmq:5672
-      - ConnectionStrings__SqlDatabase=Server=mssql;Database=Katerini;User Id=sa;Password=YourStrong!Passw0rd;
+      - ConnectionStrings__SqlDatabase=Server=mssql;Database=Katerini;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True
       - SeqLogging.Configuration__ServerUrl=http://seq:5341
     restart: on-failure
     depends_on:
@@ -30,7 +30,7 @@ services:
     environment:
       - DOTNET_ENVIRONMENT=Docker # just to make it easy to differentiate in the logs when running locally vs in docker
       - ConnectionStrings__RabbitMq=amqp://rabbitmq:5672
-      - ConnectionStrings__SqlDatabase=Server=mssql;Database=Katerini;User Id=sa;Password=YourStrong!Passw0rd;
+      - ConnectionStrings__SqlDatabase=Server=mssql;Database=Katerini;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True
       - SeqLogging.Configuration__ServerUrl=http://seq:5341
     restart: on-failure
     depends_on:

@@ -16,23 +16,22 @@ let argument    : string = fsi.CommandLineArgs |> Array.tail |> Array.head
 let solutionDir : string = __SOURCE_DIRECTORY__
 
 let execute command arguments =
-    let startInfo = ProcessStartInfo()
-    startInfo.FileName <- command
-    startInfo.Arguments <- arguments
-    startInfo.RedirectStandardOutput <- true
-    startInfo.RedirectStandardError <- true
-    startInfo.UseShellExecute <- false
-    startInfo.CreateNoWindow <- true
+    async {
+        use proc = new Process()
+        proc.StartInfo <- ProcessStartInfo(
+        FileName               = command,
+        Arguments              = arguments,
+        RedirectStandardOutput = true,
+        RedirectStandardError  = true,
+        UseShellExecute        = false,
+        CreateNoWindow         = true)
 
-    use proc = new Process()
-    proc.StartInfo <- startInfo
-
-    proc.Start() |> ignore
-    let output = proc.StandardOutput.ReadToEnd()
-    let errors = proc.StandardError.ReadToEnd()
-    proc.WaitForExit()
-
-    (output, errors, proc.ExitCode)
+        proc.Start() |> ignore
+        let! outputTask = proc.StandardOutput.ReadToEndAsync() |> Async.AwaitTask
+        let! errorTask  = proc.StandardError.ReadToEndAsync() |> Async.AwaitTask
+        proc.WaitForExit() // You can use proc.WaitForExitAsync() in .NET 5.0+
+        return (outputTask, errorTask, proc.ExitCode)
+    } |> Async.RunSynchronously
 
 let db () =
     printfn "Initializing database..."
@@ -52,7 +51,7 @@ let build () =
     let dockerfile = Path.Combine(solutionDir, "source", "Katerini.Website", "Dockerfile")
     let imagetag   = "katerini.website:latest"
     let output, errors, exitCode = execute "docker" $"build -q --file {dockerfile} --tag {imagetag} ."
-    if not (String.IsNullOrWhiteSpace(errors)) then
+    if exitCode <> 0 then
         printfn "Error building Docker image: %s" errors
         exit 1
     printfn "Docker image %s built successfully." imagetag
@@ -61,7 +60,7 @@ let build () =
     let dockerfile = Path.Combine(solutionDir, "source", "Katerini.Service", "Dockerfile")
     let imagetag   = "katerini.service:latest"
     let output, errors, exitCode = execute "docker" $"build -q --file {dockerfile} --tag {imagetag} ."
-    if not (String.IsNullOrWhiteSpace(errors)) then
+    if exitCode <> 0 then
         printfn "Error building Docker image: %s" errors
         exit 1
     printfn "Docker image %s built successfully." imagetag
@@ -70,7 +69,7 @@ let build () =
 let run () =
     printfn "Running: docker-compose up -d"
     let output, errors, exitCode = execute "docker-compose" "up -d"
-    if not (String.IsNullOrWhiteSpace(errors)) then
+    if exitCode <> 0 then
         printfn "Error running docker-compose: %s" errors
         exit 1
     printfn "All done!"

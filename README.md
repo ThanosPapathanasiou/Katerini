@@ -21,16 +21,13 @@ The aim is to allow both the website and service to scale horizontally and to do
 
 Before you can run the application locally, you need to:
 
-1. Create the database:
-   > TODO: add instructions
-2. Build the docker images and get the infrastructure up and running.
-   > The easiest way is through the following command:
+1. Build the docker images and run docker-compose to get the infrastructure up and running.
       ```powershell
-      docker build --file source\Katerini.Website\Dockerfile --tag katerini.website:latest . ;`
-      docker build --file source\Katerini.Service\Dockerfile --tag katerini.service:latest .
+      dotnet fsi build.fsx run
       ```
+2. Create / apply migrations for the database:
       ```powershell
-      docker-compose up -d
+      dotnet fsi build.fsx db
       ```
 3. Setup the reverse proxy so you get nice subdomains:
    - Open a notepad as administrator

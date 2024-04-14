@@ -11,15 +11,8 @@ public interface IOutboxService
     Task AddToOutboxAsync(IMessage message);
 }
 
-public class OutboxService : IOutboxService
+public class OutboxService(IDbConnection connection) : IOutboxService
 {
-    private readonly IDbConnection _connection;
-
-    public OutboxService(IDbConnection connection)
-    {
-        _connection = connection;
-    }
-    
     public async Task AddToOutboxAsync(IMessage message)
     {
         const string sql = """
@@ -34,6 +27,6 @@ public class OutboxService : IOutboxService
             Payload = JsonSerializer.Serialize(message, message.GetType())
         };
 
-        await _connection.ExecuteAsync(sql, outboxMessage);
+        await connection.ExecuteAsync(sql, outboxMessage);
     }
 }

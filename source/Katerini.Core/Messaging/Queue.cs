@@ -9,32 +9,21 @@ namespace Katerini.Core.Messaging;
 
 public interface IQueue
 {
-    public const string QueueName = "Katerini";
-    
     // TODO: make enqueue idempotent, i.e. sending the same message twice should ignore the 2nd try.
     public void Enqueue(IMessage message);
 
     public Task<IMessage> DequeueAsync();
 }
 
-public class RabbitMqConnection : Uri
-{
-    public RabbitMqConnection(string uriString) : base(uriString)
-    {
-    }
-}
+public record RabbitMqSettings(string QueueName, string ConnectionString);
 
-public class RabbitMqQueue : IQueue
+public class RabbitMqQueue(RabbitMqSettings settings) : IQueue
 {
-    private readonly ConnectionFactory _connectionFactory;
-
-    public RabbitMqQueue(RabbitMqConnection rabbitMqUri)
+    private readonly string _queueName = settings.QueueName;
+    private readonly ConnectionFactory _connectionFactory = new()
     {
-        _connectionFactory = new ConnectionFactory
-        {
-            Uri = rabbitMqUri
-        };
-    }
+        Uri = new Uri(settings.ConnectionString)
+    };
 
     public void Enqueue(IMessage message)
     {
@@ -42,7 +31,7 @@ public class RabbitMqQueue : IQueue
         using var channel = connection.CreateModel();
 
         channel.QueueDeclare(
-            queue: IQueue.QueueName,
+            queue: _queueName,
             durable: false,
             exclusive: false,
             autoDelete: false,
@@ -59,7 +48,7 @@ public class RabbitMqQueue : IQueue
 
         channel.BasicPublish(
             exchange: string.Empty,
-            routingKey: IQueue.QueueName,
+            routingKey: _queueName,
             body: binaryMessage,
             basicProperties: properties);
     }
@@ -70,7 +59,7 @@ public class RabbitMqQueue : IQueue
         using var channel = connection.CreateModel();
 
         channel.QueueDeclare(
-            queue: IQueue.QueueName,
+            queue: _queueName,
             durable: false,
             exclusive: false,
             autoDelete: false,
@@ -87,8 +76,10 @@ public class RabbitMqQueue : IQueue
             tcs.SetResult(receivedMessage);
         };
 
-        channel.BasicConsume(queue: IQueue.QueueName, autoAck: true, consumer: consumer);
+        channel.BasicConsume(queue: _queueName, autoAck: true, consumer: consumer);
 
         return await tcs.Task;
     }
 }
+
+// TODO: support more queue technologies like Azure service bus

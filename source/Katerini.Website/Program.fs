@@ -67,7 +67,6 @@ let main args =
 
     // setup application
     let app = builder.Build()
-    app.UseHttpLogging() |> ignore
 
     if app.Environment.IsDevelopment() then
         app .UseDeveloperExceptionPage()
@@ -79,7 +78,8 @@ let main args =
 
     // TODO: add authentication / authorization
 
-    app .UseStaticFiles()
+    app //.UseHttpLogging()
+        .UseStaticFiles()
         .UseGiraffe(webApp)
 
     Log.Logger.Information("Application Starting...")

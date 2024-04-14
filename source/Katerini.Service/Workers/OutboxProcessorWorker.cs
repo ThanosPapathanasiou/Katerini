@@ -8,29 +8,18 @@ using Microsoft.Extensions.Logging;
 
 namespace Katerini.Service.Workers;
 
-public class OutboxProcessorWorker : BackgroundService
+public class OutboxProcessorWorker(IServiceProvider services, ILogger<OutboxProcessorWorker> logger) : BackgroundService
 {
-    private readonly IServiceProvider _services;
-    private readonly ILogger<OutboxProcessorWorker> _logger;
-
-    public OutboxProcessorWorker(IServiceProvider services, ILogger<OutboxProcessorWorker> logger)
-    {
-        _services = services;
-        _logger = logger;
-    }
-
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("{Worker} started at: {Time}", nameof(OutboxProcessorWorker), DateTimeOffset.UtcNow);
-        using var scope = _services.CreateScope();
+        logger.LogInformation("{Worker} started at: {Time}", nameof(OutboxProcessorWorker), DateTimeOffset.UtcNow);
+        using var scope = services.CreateScope();
+        var outboxProcessor = scope.ServiceProvider.GetRequiredService<IOutboxProcessor>();
+        while (!stoppingToken.IsCancellationRequested)
         {
-            var outboxProcessor = scope.ServiceProvider.GetRequiredService<IOutboxProcessor>();
-            while (!stoppingToken.IsCancellationRequested)
-            {
-                _logger.LogDebug("{Worker} running at: {Time}", nameof(OutboxProcessorWorker), DateTimeOffset.UtcNow);
-                await outboxProcessor.ProcessOutboxMessagesAsync(stoppingToken);
-                await Task.Delay(1000, stoppingToken);
-            }
+            logger.LogDebug("{Worker} running at: {Time}", nameof(OutboxProcessorWorker), DateTimeOffset.UtcNow);
+            await outboxProcessor.ProcessOutboxMessagesAsync(stoppingToken);
+            await Task.Delay(1000, stoppingToken);
         }
     }
 }

@@ -13,13 +13,12 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Katerini.Core.Messaging\Katerini.Core.Messaging.csproj" />
-        <ProjectReference Include="..\Katerini.Core.Outbox\Katerini.Core.Outbox.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
         <Content Include="..\..\.dockerignore">
             <Link>.dockerignore</Link>
         </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Katerini.Core\Katerini.Core.csproj" />
     </ItemGroup>
 </Project>

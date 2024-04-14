@@ -1,15 +1,14 @@
 module Katerini.Website.Pages.ContactForm
 
 open System
-open System.Collections.Generic
 open System.Transactions
 
 open Giraffe
 open Giraffe.ViewEngine
 
+open Katerini.Core.Messaging.Messages
 open Microsoft.AspNetCore.Http
 
-open Katerini.Core.Messaging.Messages
 open Katerini.Core.Outbox
 open Katerini.Website.Pages.Htmx
 open Katerini.Website.Pages.BaseView
@@ -28,15 +27,9 @@ type ContactInformation = {
     LastName  : LastName
 }
 
-let Email     = nameof(Unchecked.defaultof<ContactInformation>.Email)
-let FirstName = nameof(Unchecked.defaultof<ContactInformation>.FirstName)
-let LastName  = nameof(Unchecked.defaultof<ContactInformation>.LastName)
-
-let data : IDictionary<string, TextFieldMetadata> = dict [
-    (Email,     { Name = Email;     Label = "Email";      Url = "/contact-form/email" })
-    (FirstName, { Name = FirstName; Label = "First Name"; Url = "/contact-form/firstname" })
-    (LastName,  { Name = LastName;  Label = "Last Name";  Url = "/contact-form/lastname" })
-]
+let initialEmail     : Email     = { Value = Initial ; Name = nameof(Email)     ; Label = "Email"      ; Url = "/contact-form/email"     }
+let initialFirstName : FirstName = { Value = Initial ; Name = nameof(FirstName) ; Label = "Name" ; Url = "/contact-form/firstname" }
+let initialLastName  : LastName  = { Value = Initial ; Name = nameof(LastName)  ; Label = "Surname"  ; Url = "/contact-form/lastname"  }
 
 // ---------------------------------
 // Validations
@@ -44,19 +37,19 @@ let data : IDictionary<string, TextFieldMetadata> = dict [
 
 let validateEmail (rawEmail: string) : Email =
     match rawEmail with
-    | s when String.IsNullOrWhiteSpace s -> Invalid (s, "Field is mandatory.")
-    | s when s.Contains("@") && s.Contains(".") -> Valid s
-    | s  -> Invalid (s, "Invalid Email Address") 
+    | s when String.IsNullOrWhiteSpace s        -> { initialEmail with Value = Invalid (s, "Field is mandatory.")}
+    | s when s.Contains("@") && s.Contains(".") -> { initialEmail with Value = Valid s}
+    | s                                         -> { initialEmail with Value = Invalid (s, "Invalid Email Address") } 
 
 let validateFirstName (rawFirstName: string) : FirstName =
     match rawFirstName with
-    | s when String.IsNullOrWhiteSpace s -> Invalid (s, "Field is mandatory.")
-    | s -> Valid s
+    | s when String.IsNullOrWhiteSpace s -> { initialFirstName with Value = Invalid (s, "Field is mandatory.")}
+    | s                                  -> { initialFirstName with Value = Valid s}
 
-let validateLastName (rawFirstName: string) : LastName =
-    match rawFirstName with
-    | s when String.IsNullOrWhiteSpace s -> Invalid (s, "Field is mandatory.")
-    | s -> Valid s
+let validateLastName (rawLastName: string) : LastName =
+    match rawLastName with
+    | s when String.IsNullOrWhiteSpace s -> { initialLastName with Value = Invalid (s, "Field is mandatory.")}
+    | s                                  -> { initialLastName with Value = Valid s}
 
 
 // ---------------------------------
@@ -71,9 +64,9 @@ let contactFormComponent (contactInformation : ContactInformation) =
         _hyperScript "on submit set me.submitting to true wait for htmx:afterOnLoad from me set me.submitting to false"
     ] [
 
-        textFieldComponent contactInformation.Email     data[Email]
-        textFieldComponent contactInformation.FirstName data[FirstName]
-        textFieldComponent contactInformation.LastName  data[LastName]
+        textFieldComponent contactInformation.Email
+        textFieldComponent contactInformation.FirstName
+        textFieldComponent contactInformation.LastName
 
         div [ _classes [ Bulma.field; Bulma.``is-grouped`` ] ] [
             button [
@@ -91,7 +84,7 @@ let contactFormView =
             div [ _classes [ Bulma.container ] ] [
                 div [ _classes [ Bulma.``is-full-desktop`` ] ] [
                     h3 [ _classes [Bulma.subtitle ; Bulma.``is-3``] ] [ Text "Signup Form" ]
-                    contactFormComponent { Email = Initial; FirstName = Initial; LastName = Initial }
+                    contactFormComponent { Email = initialEmail; FirstName = initialFirstName; LastName = initialLastName }
                 ]
             ]
         ]
@@ -116,11 +109,11 @@ let ``POST /contact-form`` : HttpHandler =
             let outbox         = ctx.GetService<IOutboxService>()
 
             // validations
-            let emailValue     = ctx.Request.Form[Email]     |> string |> validateEmail
-            let firstNameValue = ctx.Request.Form[FirstName] |> string |> validateFirstName
-            let lastNameValue  = ctx.Request.Form[LastName]  |> string |> validateLastName
+            let email     = ctx.Request.Form[initialEmail.Name]     |> string |> validateEmail
+            let firstName = ctx.Request.Form[initialFirstName.Name] |> string |> validateFirstName
+            let lastName  = ctx.Request.Form[initialLastName.Name]  |> string |> validateLastName
 
-            match emailValue, firstNameValue, lastNameValue with
+            match email.Value, firstName.Value, lastName.Value with
             | Valid validEmail, Valid validFirstName, Valid validLastName ->
                 let message = ContactUsMessage(validFirstName, validLastName, validEmail)
 
@@ -128,13 +121,13 @@ let ``POST /contact-form`` : HttpHandler =
                 do! outbox.AddToOutboxAsync(message)
                 scope.Complete()
 
-                let html = contactFormComponent { Email=Initial; FirstName=Initial; LastName=Initial }
+                let html = contactFormComponent { Email = initialEmail; FirstName = initialFirstName; LastName = initialLastName }
                 let view = htmlView html
                 return! view next ctx
 
             | _ ->
 
-                let html = contactFormComponent { Email=emailValue; FirstName=firstNameValue; LastName=lastNameValue }
+                let html = contactFormComponent { Email = email; FirstName = firstName; LastName = lastName }
                 let view = htmlView html
                 return! view next ctx
         }
@@ -142,9 +135,9 @@ let ``POST /contact-form`` : HttpHandler =
 let ``POST /contact-form/email`` : HttpHandler =
     fun (next: HttpFunc) (ctx: HttpContext) ->
         task {
-            let emailValue = ctx.Request.Form[Email] |> string |> validateEmail
-            let html       = textFieldComponent emailValue data[Email]
-            let view       = htmlView html
+            let email = ctx.Request.Form[initialEmail.Name] |> string |> validateEmail
+            let html  = textFieldComponent email
+            let view  = htmlView html
 
             return! view next ctx
         }
@@ -152,8 +145,8 @@ let ``POST /contact-form/email`` : HttpHandler =
 let ``POST /contact-form/firstname`` : HttpHandler =
     fun (next: HttpFunc) (ctx: HttpContext) ->
         task {
-            let firstName  = ctx.Request.Form[FirstName] |> string |> validateFirstName
-            let html       = textFieldComponent firstName data[FirstName]
+            let firstName  = ctx.Request.Form[initialFirstName.Name] |> string |> validateFirstName
+            let html       = textFieldComponent firstName
             let view       = htmlView html
 
             return! view next ctx
@@ -162,8 +155,8 @@ let ``POST /contact-form/firstname`` : HttpHandler =
 let ``POST /contact-form/lastname`` : HttpHandler =
     fun (next: HttpFunc) (ctx: HttpContext) ->
         task {
-            let lastName   = ctx.Request.Form[LastName] |> string |> validateLastName
-            let html       = textFieldComponent lastName data[LastName]
+            let lastName   = ctx.Request.Form[initialLastName.Name] |> string |> validateLastName
+            let html       = textFieldComponent lastName
             let view       = htmlView html
 
             return! view next ctx

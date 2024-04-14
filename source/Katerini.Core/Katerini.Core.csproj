@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+      <PackageReference Include="MediatR" />
+      <PackageReference Include="MediatR.Contracts" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+      <PackageReference Include="RabbitMQ.Client" />
+      <PackageReference Include="Dapper" />  
+    </ItemGroup>
+
+</Project>

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -11,18 +11,11 @@ public record ContactUsMessage(string FirstName, string LastName, string Email) 
     public Guid MessageId { get; init; } = Guid.NewGuid();
 }
 
-public class ContactUsMessageHandler : IRequestHandler<ContactUsMessage>
+public class ContactUsMessageHandler(ILogger<ContactUsMessageHandler> logger) : IRequestHandler<ContactUsMessage>
 {
-    private readonly ILogger<ContactUsMessageHandler> _logger;
-
-    public ContactUsMessageHandler(ILogger<ContactUsMessageHandler> logger)
-    {
-        _logger = logger;
-    }
-
     public Task Handle(ContactUsMessage request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Received message '{MessageType}' with id: '{MessageId}'", request.GetType().Name, request.MessageId);
+        logger.LogInformation("Received message '{MessageType}' with id: '{MessageId}'", request.GetType().Name, request.MessageId);
         return Task.CompletedTask;
     }
 }

@@ -1,4 +1,4 @@
-## Katerini.Core.Messaging
+## Katerini.Messaging
 
 To keep things simple:
 

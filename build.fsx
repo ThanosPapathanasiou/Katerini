@@ -2,18 +2,7 @@ open System
 open System.Diagnostics
 open System.IO
 
-let os = Environment.OSVersion.Platform
-if os <> PlatformID.Win32NT then
-    printfn """
-This is not tested in anything other than windows.
-If you *really* want to run it then open the script and delete lines 5-12.
-Proceed at your own risk.
-"""
-    exit 1 
-
-// get the first argument passed
-let argument    : string = fsi.CommandLineArgs |> Array.tail |> Array.head
-let solutionDir : string = __SOURCE_DIRECTORY__
+let choice : string = try fsi.CommandLineArgs |> Array.tail |> Array.head with _ -> "help"
 
 let execute command arguments =
     async {
@@ -29,13 +18,13 @@ let execute command arguments =
         proc.Start() |> ignore
         let! outputTask = proc.StandardOutput.ReadToEndAsync() |> Async.AwaitTask
         let! errorTask  = proc.StandardError.ReadToEndAsync() |> Async.AwaitTask
-        proc.WaitForExit() // You can use proc.WaitForExitAsync() in .NET 5.0+
+        proc.WaitForExit()
         return (outputTask, errorTask, proc.ExitCode)
     } |> Async.RunSynchronously
 
 let db () =
     printfn "Initializing database..."
-    let dbUpProject = Path.Combine(solutionDir, "source", "Katerini.Database", "Katerini.Database.csproj")
+    let dbUpProject = Path.Combine(__SOURCE_DIRECTORY__, "source", "Katerini.Database", "Katerini.Database.csproj")
     let output, errors, exitCode = execute "dotnet" $"run --project {dbUpProject}"
     // printfn "%s" output
     if not (String.IsNullOrWhiteSpace(errors)) then
@@ -48,7 +37,7 @@ let db () =
 
 let build () =
     printfn "Running: docker build --file source\Katerini.Website\Dockerfile --tag katerini.website:latest ."
-    let dockerfile = Path.Combine(solutionDir, "source", "Katerini.Website", "Dockerfile")
+    let dockerfile = Path.Combine(__SOURCE_DIRECTORY__, "source", "Katerini.Website", "Dockerfile")
     let imagetag   = "katerini.website:latest"
     let output, errors, exitCode = execute "docker" $"build -q --file {dockerfile} --tag {imagetag} ."
     if exitCode <> 0 then
@@ -57,7 +46,7 @@ let build () =
     printfn "Docker image %s built successfully." imagetag
 
     printfn "Running: docker build --file source\Katerini.Service\Dockerfile --tag katerini.service:latest ."
-    let dockerfile = Path.Combine(solutionDir, "source", "Katerini.Service", "Dockerfile")
+    let dockerfile = Path.Combine(__SOURCE_DIRECTORY__, "source", "Katerini.Service", "Dockerfile")
     let imagetag   = "katerini.service:latest"
     let output, errors, exitCode = execute "docker" $"build -q --file {dockerfile} --tag {imagetag} ."
     if exitCode <> 0 then
@@ -91,12 +80,12 @@ help  - displays this helpful message
 """
     ()
 
-match argument.ToLowerInvariant() with
-| "db"    -> db ()
-| "build" -> build ()
-| "run"   -> build () ; run ()
-| "stop"  -> stop ()
-| "help"  -> help ()
+match choice.ToLowerInvariant() with
+| "db"              -> db ()
+| "build"           -> build ()
+| "start" | "run"   -> build () ; run ()
+| "stop"            -> stop ()
+| "help"            -> help ()
 | _ ->
     printfn """Command not recognized."""
     help ()

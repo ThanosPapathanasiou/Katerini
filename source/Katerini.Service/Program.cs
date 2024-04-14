@@ -29,10 +29,10 @@ public static class Program
         Serilog.Debugging.SelfLog.Enable(Console.Error);
 
         // setup RabbitMQ
-        builder.Services.AddScoped<RabbitMqConnection>(sp =>
+        builder.Services.AddScoped<RabbitMqSettings>(sp =>
         {
             var configuration = sp.GetRequiredService<IConfiguration>();
-            return new RabbitMqConnection(configuration.GetConnectionString("RabbitMq")!);
+            return new RabbitMqSettings("Katerini", configuration.GetConnectionString("RabbitMq")!);
         });
         builder.Services.AddScoped<IQueue, RabbitMqQueue>();
 

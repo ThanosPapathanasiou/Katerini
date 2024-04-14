@@ -8,7 +8,7 @@ namespace Katerini.Core.Messaging;
 
 public static class MessagingHelpers
 {
-    private static IDictionary<string, Type> GetMessageNamesAndTypes()
+    private static Dictionary<string, Type> GetMessageNamesAndTypes()
     {
         // TODO: add a unit test that ensures that the maximum length of the message name is not more than 255 (the length we expect in the outbox pattern table)
         var dictionaryOfMessages = Assembly.GetAssembly(typeof(IMessage))!

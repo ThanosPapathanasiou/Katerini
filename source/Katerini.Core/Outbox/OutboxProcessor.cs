@@ -12,23 +12,14 @@ public interface IOutboxProcessor
     Task ProcessOutboxMessagesAsync(CancellationToken cancellationToken);
 }
 
-public class OutboxProcessor : IOutboxProcessor
+public class OutboxProcessor(IQueue queue, IDbConnection connection) : IOutboxProcessor
 {
-    private readonly IQueue _queue;
-    private readonly IDbConnection _connection;
-
-    public OutboxProcessor(IQueue queue, IDbConnection connection)
-    {
-        _queue = queue;
-        _connection = connection;
-    }
-
     public async Task ProcessOutboxMessagesAsync(CancellationToken cancellationToken)
     {
         const string getUnprocessedMessages = "SELECT * FROM OutboxMessages WHERE ProcessedAt is NULL";
         const string updateProcessedMessage = "UPDATE OutboxMessages SET ProcessedAt = GETUTCDATE() WHERE Id = @Id";
 
-        var unprocessedOutboxMessages = _connection
+        var unprocessedOutboxMessages = connection
             .Query<OutboxMessage>(getUnprocessedMessages)
             .ToList();
 
@@ -41,10 +32,10 @@ public class OutboxProcessor : IOutboxProcessor
             var queueMessage = MessagingHelpers.ConvertToIMessage(
                 jsonMessage: unprocessedOutboxMessage.Payload,
                 messageType: unprocessedOutboxMessage.MessageType);
-            _queue.Enqueue(queueMessage);
+            queue.Enqueue(queueMessage);
 
             // Mark as processed
-            await _connection.ExecuteAsync(updateProcessedMessage, new { Id = unprocessedOutboxMessage.Id });
+            await connection.ExecuteAsync(updateProcessedMessage, new { Id = unprocessedOutboxMessage.Id });
         }
     }
 }

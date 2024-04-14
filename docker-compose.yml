@@ -5,7 +5,7 @@ services:
     image: katerini.website:latest
     container_name: website
     ports: 
-      - "15000:80"
+      - "15000:8080"
     environment:
       - DOTNET_ENVIRONMENT=Docker # just to make it easy to differentiate in the logs when running locally vs in docker
       - ConnectionStrings__RabbitMq=amqp://rabbitmq:5672

@@ -6,9 +6,9 @@ open System.Transactions
 open Giraffe
 open Giraffe.ViewEngine
 
-open Katerini.Core.Messaging.Messages
 open Microsoft.AspNetCore.Http
 
+open Katerini.Core.Messaging.Messages
 open Katerini.Core.Outbox
 open Katerini.Website.Pages.Htmx
 open Katerini.Website.Pages.BaseView
@@ -27,8 +27,8 @@ type ContactInformation = {
     LastName  : LastName
 }
 
-let initialEmail     : Email     = { Value = Initial ; Name = nameof(Email)     ; Label = "Email"      ; Url = "/contact-form/email"     }
-let initialFirstName : FirstName = { Value = Initial ; Name = nameof(FirstName) ; Label = "Name" ; Url = "/contact-form/firstname" }
+let initialEmail     : Email     = { Value = Initial ; Name = nameof(Email)     ; Label = "Email"    ; Url = "/contact-form/email"     }
+let initialFirstName : FirstName = { Value = Initial ; Name = nameof(FirstName) ; Label = "Name"     ; Url = "/contact-form/firstname" }
 let initialLastName  : LastName  = { Value = Initial ; Name = nameof(LastName)  ; Label = "Surname"  ; Url = "/contact-form/lastname"  }
 
 // ---------------------------------

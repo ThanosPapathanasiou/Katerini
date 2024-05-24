@@ -26,13 +26,12 @@ let db () =
     printfn "Initializing database..."
     let dbUpProject = Path.Combine(__SOURCE_DIRECTORY__, "source", "Katerini.Database", "Katerini.Database.csproj")
     let output, errors, exitCode = execute "dotnet" $"run --project {dbUpProject}"
-    // printfn "%s" output
     if not (String.IsNullOrWhiteSpace(errors)) then
-        printfn "Errors:\n%s" errors
+        printfn $"Errors:{Environment.NewLine}%s{errors}"
     if exitCode = 0 then
         printfn "Database upgrade ran successfully."
     else
-        printfn "Database upgrade failed to run with exit code: %d" exitCode
+        printfn $"Database upgrade failed to run with exit code: %d{exitCode}"
     ()
 
 let build () =
@@ -41,25 +40,25 @@ let build () =
     let imagetag   = "katerini.website:latest"
     let output, errors, exitCode = execute "docker" $"build -q --file {dockerfile} --tag {imagetag} ."
     if exitCode <> 0 then
-        printfn "Error building Docker image: %s" errors
+        printfn $"Error building Docker image: %s{errors}"
         exit 1
-    printfn "Docker image %s built successfully." imagetag
+    printfn $"Docker image %s{imagetag} built successfully."
 
     printfn "Running: docker build --file source\Katerini.Service\Dockerfile --tag katerini.service:latest ."
     let dockerfile = Path.Combine(__SOURCE_DIRECTORY__, "source", "Katerini.Service", "Dockerfile")
     let imagetag   = "katerini.service:latest"
     let output, errors, exitCode = execute "docker" $"build -q --file {dockerfile} --tag {imagetag} ."
     if exitCode <> 0 then
-        printfn "Error building Docker image: %s" errors
+        printfn $"Error building Docker image: %s{errors}"
         exit 1
-    printfn "Docker image %s built successfully." imagetag
+    printfn $"Docker image %s{imagetag} built successfully."
     ()
 
 let run () =
     printfn "Running: docker-compose up -d"
     let output, errors, exitCode = execute "docker-compose" "up -d"
     if exitCode <> 0 then
-        printfn "Error running docker-compose: %s" errors
+        printfn $"Error running docker-compose: %s{errors}"
         exit 1
     printfn "All done!"
     ()
@@ -86,9 +85,6 @@ match choice.ToLowerInvariant() with
 | "start" | "run"   -> build () ; run ()
 | "stop"            -> stop ()
 | "help"            -> help ()
-| _ ->
-    printfn """Command not recognized."""
-    help ()
-    exit 1
+| _                 -> printfn """Command not recognized.""" ; help () ; exit 1
 
 exit 0

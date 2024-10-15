@@ -1,12 +1,4 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-WORKDIR /app
-EXPOSE 8080
-EXPOSE 443
-
-# Update package lists and install curl
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
-
-
+﻿# build the app
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 COPY ["Directory.Build.props", "Directory.Build.props"]
@@ -17,11 +9,14 @@ COPY . .
 WORKDIR "/src/source/Katerini.Website"
 RUN dotnet build "Katerini.Website.fsproj" -c Release -o /app/build
 
+# publish to /app/publish
 FROM build AS publish
 RUN dotnet publish "Katerini.Website.fsproj" -c Release -o /app/publish /p:UseAppHost=false
 
-FROM base AS final
+# run the app
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
+EXPOSE 8080
+EXPOSE 443
 COPY --from=publish /app/publish .
-
 ENTRYPOINT ["dotnet", "Katerini.Website.dll"]

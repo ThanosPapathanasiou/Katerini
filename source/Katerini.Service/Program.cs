@@ -20,7 +20,7 @@ public static class Program
         // setup logging 
         Log.Logger = new LoggerConfiguration()
             .WriteTo.Console()
-            .WriteTo.Seq(serverUrl: builder.Configuration["SeqLogging.Configuration:ServerUrl"]!)
+            .WriteTo.Seq(serverUrl: builder.Configuration["SeqLoggingConfiguration:ServerUrl"]!)
             .Enrich.FromLogContext()
             .Enrich.WithProperty("Application", builder.Environment.ApplicationName)
             .Enrich.WithProperty("Environment", builder.Environment.EnvironmentName)

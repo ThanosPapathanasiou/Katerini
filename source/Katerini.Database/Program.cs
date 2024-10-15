@@ -4,6 +4,10 @@ namespace Katerini.Database;
 
 public static class Program
 {
+    const int SUCCESS_CODE = 0;
+    const int FAILURE_TO_UPDATE_CODE = 1;
+    const int ERROR_CODE = 2;
+    
     public static int Main(string[] args)
     {
         try
@@ -14,8 +18,8 @@ public static class Program
 
             return success switch
             {
-                true => 0,
-                false => -1
+                true => SUCCESS_CODE,
+                false => FAILURE_TO_UPDATE_CODE
             };
         }
         catch (Exception ex)
@@ -23,7 +27,7 @@ public static class Program
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine($"An error occurred: {ex.Message}");
             Console.ResetColor();
-            return -2;
+            return ERROR_CODE;
         }
     }
 }

@@ -56,7 +56,7 @@ let build () =
 
 let run () =
     printfn "Running: docker-compose up -d"
-    let output, errors, exitCode = execute "docker-compose" "up -d"
+    let output, errors, exitCode = execute "docker-compose" "-f ./infrastructure/localhost/docker-compose.yml up -d"
     if exitCode <> 0 then
         printfn $"Error running docker-compose: %s{errors}"
         exit 1
@@ -65,7 +65,7 @@ let run () =
 
 let stop () =
     printfn "Running: docker-compose down"
-    let output, errors, exitCode = execute "docker-compose" "down"
+    let output, errors, exitCode = execute "docker-compose" "-f ./infrastructure/localhost/docker-compose.yml down"
     printfn "All done!"
     ()
 

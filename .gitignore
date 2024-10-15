@@ -2,6 +2,9 @@
 bin/
 obj/
 
+# deployment folder
+deployment/*
+
 # local docker volume
 .data/*
 

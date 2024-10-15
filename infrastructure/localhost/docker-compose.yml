@@ -1,9 +1,9 @@
 version: '3.8'
 services:
 
-  nginx:
+  katerini.proxy:
     image: nginx:latest
-    container_name: nginx_reverse_proxy
+    container_name: katerini.proxy
     restart: unless-stopped
     ports:
       - "80:80"
@@ -20,7 +20,7 @@ services:
       - DOTNET_ENVIRONMENT=Docker # just to make it easy to differentiate in the logs when running locally vs in docker
       - ConnectionStrings__RabbitMq=amqp://rabbitmq:5672
       - ConnectionStrings__SqlDatabase=Server=mssql;Database=Katerini;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True
-      - SeqLogging.Configuration__ServerUrl=http://seq:5341
+      - SeqLoggingConfiguration__ServerUrl=http://seq:5341
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
@@ -32,13 +32,13 @@ services:
       - DOTNET_ENVIRONMENT=Docker # just to make it easy to differentiate in the logs when running locally vs in docker
       - ConnectionStrings__RabbitMq=amqp://rabbitmq:5672
       - ConnectionStrings__SqlDatabase=Server=mssql;Database=Katerini;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True
-      - SeqLogging.Configuration__ServerUrl=http://seq:5341
+      - SeqLoggingConfiguration__ServerUrl=http://seq:5341
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
-  mssql:
+  katerini.mssql:
     image: mcr.microsoft.com/mssql/server
-    container_name: mssql
+    container_name: katerini.mssql
     restart: unless-stopped
     user: root
     environment:
@@ -51,9 +51,9 @@ services:
       - mssql_data:/var/opt/mssql/data
       - mssql_log:/var/opt/mssql/log
 
-  rabbitmq:
+  katerini.rabbitmq:
     image: rabbitmq:3.12-management
-    container_name: rabbitmq
+    container_name: katerini.rabbitmq
     restart: unless-stopped
     ports:
       - "5672:5672"
@@ -62,9 +62,9 @@ services:
       - rabbitmq_data:/var/lib/rabbitmq/
       - rabbitmq_logs:/var/log/rabbitmq/
 
-  seq:
+  katerini.seq:
     image: datalust/seq:latest
-    container_name: seq
+    container_name: katerini.seq
     restart: unless-stopped
     environment:
       - ACCEPT_EULA=Y
@@ -76,16 +76,16 @@ services:
 
   redis:
     image: redis:latest
-    container_name: redis
+    container_name: katerini.redis
     restart: unless-stopped
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
     
-  redis-commander:
+  katerini.redis-webui:
     image: rediscommander/redis-commander:latest
-    container_name: redis_commander
+    container_name: katerini.redis-webui
     environment:
       - REDIS_HOSTS=local:redis:6379
     ports:

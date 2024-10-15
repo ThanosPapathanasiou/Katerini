@@ -56,16 +56,22 @@ let build () =
 
 let run () =
     printfn "Running: docker-compose up -d"
-    let output, errors, exitCode = execute "docker-compose" "-f ./infrastructure/localhost/docker-compose.yml up -d"
+    let output, errors, exitCode = execute "docker-compose" "-f ./infrastructure/localhost/docker-compose.yml -p katerini up -d"
     if exitCode <> 0 then
         printfn $"Error running docker-compose: %s{errors}"
         exit 1
     printfn "All done!"
+    printfn """
+website   : http://website.katerini.local
+caching   : http://caching.katerini.local   | no authentication needed.
+messaging : http://messaging.katerini.local | username / password is guest
+logging   : http://logs.katerini.local      | no authentication needed.
+"""
     ()
 
 let stop () =
     printfn "Running: docker-compose down"
-    let output, errors, exitCode = execute "docker-compose" "-f ./infrastructure/localhost/docker-compose.yml down"
+    let output, errors, exitCode = execute "docker-compose" "-f ./infrastructure/localhost/docker-compose.yml -p katerini  down"
     printfn "All done!"
     ()
 

@@ -55,8 +55,16 @@ let build () =
     ()
 
 let run () =
-    printfn "Running: docker-compose up -d"
-    let output, errors, exitCode = execute "docker-compose" "-f ./infrastructure/localhost/docker-compose.yml -p katerini up -d"
+    printfn "Creating a common docker network."
+    let output, errors, exitCode = execute "docker" "network create -d bridge shared_network"
+
+    printfn "Running: 'docker-compose up -d' This may take a while as it's downloading docker images."
+    let output, errors, exitCode = execute "docker-compose" "-f ./infrastructure/localhost/infra/docker-compose.yml up -d"
+    if exitCode <> 0 then
+        printfn $"Error running docker-compose: %s{errors}"
+        exit 1
+        
+    let output, errors, exitCode' = execute "docker-compose" "-f ./infrastructure/localhost/katerini/docker-compose.yml up -d"
     if exitCode <> 0 then
         printfn $"Error running docker-compose: %s{errors}"
         exit 1
@@ -71,7 +79,8 @@ logging   : http://logs.katerini.local      | no authentication needed.
 
 let stop () =
     printfn "Running: docker-compose down"
-    let output, errors, exitCode = execute "docker-compose" "-f ./infrastructure/localhost/docker-compose.yml -p katerini  down"
+    let output, errors, exitCode = execute "docker-compose" "-f ./infrastructure/localhost/katerini/docker-compose.yml down"
+    let output, errors, exitCode = execute "docker-compose" "-f ./infrastructure/localhost/infra/docker-compose.yml down"
     printfn "All done!"
     ()
 

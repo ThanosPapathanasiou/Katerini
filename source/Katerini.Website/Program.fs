@@ -11,6 +11,15 @@ open Microsoft.Extensions.Logging
 open Giraffe
 open Serilog
 
+let version =
+    match Environment.GetEnvironmentVariable("KATERINI_VERSION") with
+    | null -> "latest"
+    | value -> value
+
+let healthCheckMessage() =
+    let timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")
+    $"{{ \"timestamp\":\"%s{timestamp}\" ,\"version\":\"%s{version}\" }}"
+
 let webApp =
     choose [
         GET  >=> route  "/"                        >=> Katerini.Website.Pages.Index.``GET /``
@@ -21,7 +30,9 @@ let webApp =
         POST >=> route  "/contact-form/firstname"  >=> Katerini.Website.Pages.ContactForm.``POST /contact-form/firstname``
         POST >=> route  "/contact-form/lastname"   >=> Katerini.Website.Pages.ContactForm.``POST /contact-form/lastname``
 
-        GET  >=> route  "/health/live"             >=> setStatusCode 200 >=> text "OK"
+        // DO NOT CHANGE THE /version and /up ENDPOINTS. THEY ARE NEEDED FOR DEPLOYMENT
+        GET  >=> route  "/version"                 >=> setStatusCode 200 >=> text version
+        GET  >=> route  "/up"                      >=> setStatusCode 200 >=> warbler (fun _ -> text (healthCheckMessage()))
         setStatusCode 404 >=> text "Not Found"
     ]
 

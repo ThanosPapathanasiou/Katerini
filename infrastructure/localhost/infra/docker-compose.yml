@@ -1,0 +1,91 @@
+
+networks:
+  shared_network:
+    external: true
+
+services:
+
+  nginx:
+    image: nginx:stable-alpine3.20-slim
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - shared_network
+
+  seq:
+    image: datalust/seq:latest
+    container_name: seq
+    restart: unless-stopped
+    environment:
+      - ACCEPT_EULA=Y
+    ports:
+      - "5341:5341"
+      - "15673:80"
+    volumes:
+      - seq_data:/data
+    networks:
+      - shared_network
+
+  mssql:
+    image: mcr.microsoft.com/mssql/server
+    container_name: mssql
+    restart: unless-stopped
+    user: root
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_USERNAME=sa
+      - SA_PASSWORD=YourStrong!Passw0rd
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql_data:/var/opt/mssql/data
+      - mssql_log:/var/opt/mssql/log
+    networks:
+      - shared_network
+
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq/
+      - rabbitmq_logs:/var/log/rabbitmq/
+    networks:
+      - shared_network
+
+  redis-webui:
+    image: rediscommander/redis-commander:latest
+    container_name: redis-webui
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "15674:8081"
+    restart: unless-stopped
+    networks:
+      - shared_network
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - shared_network
+
+volumes:
+  mssql_data:
+  mssql_log:
+  redis_data:
+  seq_data:
+  rabbitmq_data:
+  rabbitmq_logs:

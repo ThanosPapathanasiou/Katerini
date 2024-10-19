@@ -1,0 +1,34 @@
+
+networks:
+  shared_network:
+    external: true
+
+services:
+
+  katerini.website:
+    image: katerini.website:latest
+    container_name: katerini.website
+    restart: unless-stopped
+    ports: 
+      - "15000:8080"
+    environment:
+      - DOTNET_ENVIRONMENT=Docker # just to make it easy to differentiate in the logs when running locally vs in docker
+      - ConnectionStrings__RabbitMq=amqp://rabbitmq:5672
+      - ConnectionStrings__SqlDatabase=Server=mssql;Database=Katerini;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True
+      - SeqLoggingConfiguration__ServerUrl=http://seq:5341
+    networks:
+      - shared_network
+    expose:
+      - 8080
+
+  katerini.service:
+    image: katerini.service:latest
+    container_name: katerini.service
+    restart: unless-stopped
+    environment:
+      - DOTNET_ENVIRONMENT=Docker # just to make it easy to differentiate in the logs when running locally vs in docker
+      - ConnectionStrings__RabbitMq=amqp://rabbitmq:5672
+      - ConnectionStrings__SqlDatabase=Server=mssql;Database=Katerini;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True
+      - SeqLoggingConfiguration__ServerUrl=http://seq:5341
+    networks:
+      - shared_network

@@ -8,14 +8,12 @@ without an overly complex architecture and without sacrificing developer experie
 To keep in line with the aim of this project, we try to keep the architecture very simple.
 It has to be simple enough to keep in your head at all times and to explain to someone within minutes.
 
-Our code consists of a website, a background service and an integration api to abstract / centralize any calls to 3rd party apis.
+Our code consists of a website and a background service.
 
 The aim is to allow both the website and service to scale horizontally, and to do that we need to make sure that:
  - Communication between them should be via messages. (rabbit mq / azure service bus)
  - Caching has to be via a dedicated caching solution. (redis)
  - Data is saved in a sql server. (mssql)
-
-> **TL;DR**: Applications should scale horizontally, infrastructure should scale vertically
 
 ## Getting started
 

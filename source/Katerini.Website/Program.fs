@@ -12,7 +12,7 @@ open Giraffe
 open Serilog
 
 let version =
-    match Environment.GetEnvironmentVariable("KATERINI_VERSION") with
+    match Environment.GetEnvironmentVariable("VERSION") with
     | null -> "latest"
     | value -> value
 

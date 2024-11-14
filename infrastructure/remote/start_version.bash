@@ -53,7 +53,7 @@ fi
 if ! docker ps -q -f name=katerini.proxy | grep -q .; then
     echo "katerini.proxy container is not running... Setting it up."
     export VERSION=$VERSION
-    envsubst '${VERSION}' < template_nginx.conf > nginx.conf 
+    envsubst '${VERSION}' < template_nginx.conf > /home/$USER/$SOLUTION/nginx.conf 
     docker load --quiet --input /home/$USER/$SOLUTION/katerini.proxy.tar.gz
     [ ! "$(docker ps -a | grep katerini.proxy)" ] && docker run --quiet -d --restart unless-stopped --network katerini_network -v /home/$USER/$SOLUTION/nginx.conf:/etc/nginx/nginx.conf --name katerini.proxy -p 80:80  katerini.proxy
     docker start katerini.proxy
@@ -84,7 +84,7 @@ do
       echo "Version running is        : $version_running"
       echo "Version to be deployed is : $VERSION"
       # we are using ed because we need to replace the text of the file while keeping the same inode (i.e. actual, in place, file editing.)
-      ed -s "nginx.conf" <<EOF
+      ed -s "/home/$USER/$SOLUTION/nginx.conf" <<EOF
 1,\$s/$version_running/$VERSION/g
 w
 q

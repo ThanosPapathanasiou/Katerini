@@ -53,7 +53,7 @@ fi
 if ! docker ps -q -f name=katerini.proxy | grep -q .; then
     echo "katerini.proxy container is not running... Setting it up."
     export VERSION=$VERSION
-    envsubst '${VERSION}' < template_nginx.conf > /home/$USER/$SOLUTION/nginx.conf 
+    envsubst '${VERSION}' < /home/$USER/$SOLUTION/template_nginx.conf > /home/$USER/$SOLUTION/nginx.conf 
     docker load --quiet --input /home/$USER/$SOLUTION/katerini.proxy.tar.gz
     [ ! "$(docker ps -a | grep katerini.proxy)" ] && docker run --quiet -d --restart unless-stopped --network katerini_network -v /home/$USER/$SOLUTION/nginx.conf:/etc/nginx/nginx.conf --name katerini.proxy -p 80:80  katerini.proxy
     docker start katerini.proxy

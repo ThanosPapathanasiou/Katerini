@@ -90,7 +90,11 @@ w
 q
 EOF
 
-      docker exec -it katerini.proxy nginx -s reload
+      if ! docker exec nginx nginx -s reload; then
+          echo "Failed to reload Nginx configuration"
+          exit 1
+      fi
+
       old_version=$version_running
     fi
   fi

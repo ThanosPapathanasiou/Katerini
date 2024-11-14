@@ -103,7 +103,6 @@ EOF
 done
 
 # stopping other versions
-
 if [ -n "${old_version+set}" ]; then
   echo "Stopping old version: '$old_version'"
   echo "Stopped containers with ids:"

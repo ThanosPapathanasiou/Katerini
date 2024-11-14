@@ -10,10 +10,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{BD26FBAD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Katerini.Database", "source\Katerini.Database\Katerini.Database.csproj", "{7C361BED-08B3-493E-82D8-472E7D1A998A}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "infrastructure", "infrastructure", "{CD52788E-FCF8-4FC6-A0F3-EDC90F77EDC3}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "decisions", "decisions", "{A5FB4EFD-B6D6-4B70-A925-6E16ED998C87}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Katerini.Core", "source\Katerini.Core\Katerini.Core.csproj", "{4AEE3C26-3D12-46F7-84D1-245C8F92F43A}"
 EndProject
 Global

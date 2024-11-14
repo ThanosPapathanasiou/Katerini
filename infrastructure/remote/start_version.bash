@@ -104,9 +104,11 @@ done
 
 # stopping other versions
 
-echo "Stopping old version: '$old_version'"
-echo "Stopped containers with ids:"
-docker stop $(docker ps -q -f name=katerini.*.$old_version)
+if[ -n "${old_version+set}" ]; then
+  echo "Stopping old version: '$old_version'"
+  echo "Stopped containers with ids:"
+  docker stop $(docker ps -q -f name=katerini.*.$old_version)
+fi
 
 echo "Version '$VERSION' deployed successfully!" 
 

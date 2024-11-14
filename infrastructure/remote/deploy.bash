@@ -64,7 +64,7 @@ if ! ssh ${remote_host} "[ -d $deploy_dir ]"; then
 fi
 
 # if proxy does not exist on the remote host then copy it over
-deploy_dir="/home/$DEPLOY_USER/$SOLUTION/" 
+deploy_dir="/home/$DEPLOY_USER/$SOLUTION" 
 
 if ! ssh ${remote_host} "[ -f $deploy_dir/katerini.proxy.tar.gz ]"; then
   echo "Deploying proxy to '$remote_host' remote host..." 

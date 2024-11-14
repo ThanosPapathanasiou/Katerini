@@ -8,6 +8,8 @@ public static class Program
     const int FAILURE_TO_UPDATE_CODE = 1;
     const int ERROR_CODE = 2;
     
+    // TODO: connect with serilog / seq and output the logs there.
+    
     public static int Main(string[] args)
     {
         try

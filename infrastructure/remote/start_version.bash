@@ -90,6 +90,7 @@ q
 EOF
 
       docker exec -it katerini.proxy nginx -s reload
+      old_version=$version_running
     fi
   fi
   echo "Trying again..." 
@@ -97,5 +98,11 @@ EOF
 done
 
 # stopping other versions
+
+echo "Stopping old version: '$old_version'"
+echo "Stopped containers with ids:"
+docker stop $(docker ps -q -f name=katerini.*.$old_version)
+
+echo "Version '$VERSION' deployed successfully!" 
 
 exit 0

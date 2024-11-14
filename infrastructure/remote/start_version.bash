@@ -20,36 +20,34 @@ fi
 [ ! "$(docker network ls | grep katerini_network)" ] && docker network create -d bridge katerini_network
 
 # TODO setup database upgrade
-# docker load --quiet --input /home/$USER/$SOLUTION/$VERSION/katerini.database.$VERSION.tar.gz
-# [ ! "$(docker ps -a | grep katerini.database.$VERSION)" ] && docker run --quiet -d --restart unless-stopped --network katerini_network --env-file /home/$USER/$SOLUTION/$VERSION/environment.env --name katerini.database.$VERSION katerini.database:$VERSION
-# docker start katerini.database.$VERSION
-# sleep 5
+docker load --quiet --input /home/$USER/$SOLUTION/$VERSION/katerini.database.$VERSION.tar.gz
+[ ! "$(docker ps -a | grep katerini.database.$VERSION)" ] && docker run --quiet -d --network katerini_network --env-file /home/$USER/$SOLUTION/$VERSION/environment.env --name katerini.database.$VERSION katerini.database:$VERSION
+docker start katerini.database.$VERSION
+sleep 5
 
 # TODO setup service 
-# docker load --quiet --input /home/$USER/$SOLUTION/$VERSION/katerini.service.$VERSION.tar.gz
-# [ ! "$(docker ps -a | grep katerini.website.$VERSION)" ] && docker run --quiet -d --restart unless-stopped --network katerini_network --env-file /home/$USER/$SOLUTION/$VERSION/environment.env --name katerini.service.$VERSION katerini.service:$VERSION
-# docker start katerini.service.$VERSION
-# sleep 5
-# make proxy point to the correct version.
-
+docker load --quiet --input /home/$USER/$SOLUTION/$VERSION/katerini.service.$VERSION.tar.gz
+[ ! "$(docker ps -a | grep katerini.service.$VERSION)" ] && docker run --quiet -d --restart unless-stopped --network katerini_network --env-file /home/$USER/$SOLUTION/$VERSION/environment.env --name katerini.service.$VERSION katerini.service:$VERSION
+docker start katerini.service.$VERSION
+sleep 5
 
 # setup website
-KATERINI_WEBSITE_PORT=$(shuf -i 10000-20000 -n 1)
 docker load --quiet --input /home/$USER/$SOLUTION/$VERSION/katerini.website.$VERSION.tar.gz
-[ ! "$(docker ps -a | grep katerini.website.$VERSION)" ] && docker run --quiet -d --restart unless-stopped --network katerini_network --env-file /home/$USER/$SOLUTION/$VERSION/environment.env --name katerini.website.$VERSION -p $KATERINI_WEBSITE_PORT:8080 katerini.website:$VERSION
+[ ! "$(docker ps -a | grep katerini.website.$VERSION)" ] && docker run --quiet -d --restart unless-stopped --network katerini_network --env-file /home/$USER/$SOLUTION/$VERSION/environment.env --name katerini.website.$VERSION -p 15000:8080 katerini.website:$VERSION
 docker start katerini.website.$VERSION
 sleep 5
 
 # setup proxy
 export VERSION=$VERSION
-EXPORT KATERINI_WEBSITE_PORT=8080 # $KATERINI_WEBSITE_PORT
-envsubst '${VERSION} {KATERINI_WEBSITE_PORT}' < template_nginx.conf > nginx.conf 
+envsubst '${VERSION}' < template_nginx.conf > nginx.conf 
 docker load --quiet --input /home/$USER/$SOLUTION/katerini.proxy.tar.gz
 [ ! "$(docker ps -a | grep katerini.proxy)" ] && docker run --quiet -d --restart unless-stopped --network katerini_network -v /home/$USER/$SOLUTION/nginx.conf:/etc/nginx/nginx.conf --name katerini.proxy -p 80:80  katerini.proxy
 docker start katerini.proxy
 sleep 5
 
 exit 1 # TODO: remove this 
+
+# make proxy point to the correct version.
 
 # at this point there should be two versions 
 

@@ -2,8 +2,7 @@
 set -euo pipefail
 
 export SOLUTION="katerini"
-export APPS="katerini.website,katerini.service"
-export ENV_VARIABLE_TRIM_START="KATERINI_"
+export APPS="katerini.website,katerini.service,katerini.database"
 export TAG=$(git rev-parse --short HEAD)
 
 #if [ -n "$(git status --porcelain)" ]; then
@@ -14,34 +13,26 @@ export TAG=$(git rev-parse --short HEAD)
 
 # Check if an environment was passed as an argument
 if [ $# -eq 0 ]; then
-    echo "Usage: $0 <environment> [command]"
+    echo "Usage: $0 <username> <remote-host-ip>"
     exit 1
 fi
 
-ENV=$1
-ENV_FILE="${ENV}.env"
-if [ ! -f "$ENV_FILE" ]; then
-    echo "Environment file for ${ENV} not found at ${ENV_FILE}"
-    exit 1
-fi
-source "$ENV_FILE"
+DEPLOY_USER=$1
+DEPLOY_HOST=$2
 
 cd ../.. # go to root repo level
 
 echo "Preparing deployment folder..."
 rm -r -f deployment
-
 mkdir -p deployment/$TAG
+
 # prepare environment file
-{ 
-  while IFS= read -r line; do
-    if [[ $line =~ ^export\ (${ENV_VARIABLE_TRIM_START}) ]]; then
-      transformed_line=$(echo "$line" | sed "s/export ${ENV_VARIABLE_TRIM_START}//")
-      echo "$transformed_line"
-    fi
-  done < ./infrastructure/remote/${ENV_FILE}
- echo "VERSION=$(git rev-parse --short HEAD)"
-} > ./deployment/$TAG/environment.env
+cp ./infrastructure/remote/environment.env ./deployment/$TAG/environment.env
+echo "" >> ./deployment/$TAG/environment.env # ensure that the version will be put on a new line.
+echo "VERSION=$(git rev-parse --short HEAD)" >> ./deployment/$TAG/environment.env
+
+# prepare deployment script
+cp ./infrastructure/remote/start_version.bash ./deployment/start_version.bash
 
 # prepare docker files
 IFS=',' read -r -a apps <<< "$APPS"
@@ -60,8 +51,6 @@ gzipped_image_path="./deployment/katerini.proxy.tar.gz"
 docker save katerini.proxy | gzip > ${gzipped_image_path}
 cp ./infrastructure/remote/katerini.proxy/template_nginx.conf ./deployment/template_nginx.conf
 
-# prepare deployment script
-cp ./infrastructure/remote/start_version.bash ./deployment/start_version.bash
 
 remote_host="$DEPLOY_USER@$DEPLOY_HOST"
 echo "Copying deployment folder files to $remote_host..."

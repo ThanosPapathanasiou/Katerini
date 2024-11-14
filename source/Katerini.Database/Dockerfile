@@ -1,0 +1,20 @@
+﻿# build the app
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+COPY ["Directory.Build.props", "Directory.Build.props"]
+COPY ["Directory.Packages.props", "Directory.Packages.props"]
+COPY ["source/", "source/"]
+RUN dotnet restore "source/Katerini.Database/Katerini.Database.csproj"
+COPY . .
+WORKDIR "/src/source/Katerini.Database"
+RUN dotnet build "Katerini.Database.csproj" -c Release -o /app/build
+
+# publish to /app/publish
+FROM build AS publish
+RUN dotnet publish "Katerini.Database.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+# run the app
+FROM mcr.microsoft.com/dotnet/runtime:8.0 AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "Katerini.Database.dll"]

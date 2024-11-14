@@ -104,7 +104,7 @@ done
 
 # stopping other versions
 
-if[ -n "${old_version+set}" ]; then
+if [ -n "${old_version+set}" ]; then
   echo "Stopping old version: '$old_version'"
   echo "Stopped containers with ids:"
   docker stop $(docker ps -q -f name=katerini.*.$old_version)

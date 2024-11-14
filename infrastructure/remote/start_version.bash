@@ -79,8 +79,17 @@ do
       echo "There was an error retrieving the version currently running..."
       exit 1
     else 
-      echo "Do the deployment"
-      # TODO: change the nginx.conf 
+      echo "Doing the deployment."
+      echo "Version running is        : $version_running"
+      echo "Version to be deployed is : $VERSION"
+      # we are using ed because we need to replace the text of the file while keeping the same inode (i.e. true in place file editing.)
+      ed -s "nginx.conf" <<EOF
+1,\$s/$version_running/$VERSION/g
+w
+q
+EOF
+
+      docker exec -it katerini.proxy nginx -s reload
     fi
   fi
   echo "Trying again..." 

@@ -82,7 +82,7 @@ do
       echo "Doing the deployment."
       echo "Version running is        : $version_running"
       echo "Version to be deployed is : $VERSION"
-      # we are using ed because we need to replace the text of the file while keeping the same inode (i.e. true in place file editing.)
+      # we are using ed because we need to replace the text of the file while keeping the same inode (i.e. actual, in place, file editing.)
       ed -s "nginx.conf" <<EOF
 1,\$s/$version_running/$VERSION/g
 w

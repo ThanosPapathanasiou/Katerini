@@ -74,8 +74,6 @@ fi
 scp ./deployment/template_nginx.conf ${remote_host}:${deploy_dir}    
 scp ./deployment/start_version.bash ${remote_host}:${deploy_dir}    
 
-exit 0 # TODO: remove this  
-
 # execute the script that will start the version on the server.
 ssh ${remote_host} "$deploy_dir/start_version.bash $TAG;"
 

@@ -41,9 +41,10 @@ fi
 
 # setup website
 if ! docker ps -q -f name=katerini.website.$VERSION | grep -q .; then
+    KATERINI_WEBSITE_PORT=$(shuf -i 10000-20000 -n 1)
     echo "katerini.website.$VERSION container is not running... Setting it up."
     docker load --quiet --input /home/$USER/$SOLUTION/$VERSION/katerini.website.$VERSION.tar.gz
-    [ ! "$(docker ps -a | grep katerini.website.$VERSION)" ] && docker run --quiet -d --restart unless-stopped --network katerini_network --env-file /home/$USER/$SOLUTION/$VERSION/environment.env --name katerini.website.$VERSION -p 15000:8080 katerini.website:$VERSION
+    [ ! "$(docker ps -a | grep katerini.website.$VERSION)" ] && docker run --quiet -d --restart unless-stopped --network katerini_network --env-file /home/$USER/$SOLUTION/$VERSION/environment.env --name katerini.website.$VERSION -p $KATERINI_WEBSITE_PORT:8080 katerini.website:$VERSION
     docker start katerini.website.$VERSION
     sleep 5
 fi
